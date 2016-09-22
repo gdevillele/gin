@@ -11,7 +11,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/gin-gonic/gin/render"
+	"github.com/gdevillele/gin/render"
 )
 
 // Version is Framework's version
@@ -121,12 +121,16 @@ func (engine *Engine) allocateContext() *Context {
 	return &Context{engine: engine}
 }
 
-func (engine *Engine) LoadHTMLGlob(pattern string) {
+func (engine *Engine) LoadHTMLGlob(pattern string, additionalFuncs template.FuncMap) {
+	if additionalFuncs == nil {
+		panic("additional funcs is nil. Must do additionalFuncs = make(template.FuncMap)")
+	}
+
 	if IsDebugging() {
-		debugPrintLoadTemplate(template.Must(template.ParseGlob(pattern)))
-		engine.HTMLRender = render.HTMLDebug{Glob: pattern}
+		debugPrintLoadTemplate(template.Must(template.New("gin-gonic-root-template").Funcs(additionalFuncs).ParseGlob(pattern)))
+		engine.HTMLRender = render.HTMLDebug{Glob: pattern, Funcs: additionalFuncs}
 	} else {
-		templ := template.Must(template.ParseGlob(pattern))
+		templ := template.Must(template.New("gin-gonic-root-template").Funcs(additionalFuncs).ParseGlob(pattern))
 		engine.SetHTMLTemplate(templ)
 	}
 }

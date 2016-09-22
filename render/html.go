@@ -21,6 +21,7 @@ type (
 	HTMLDebug struct {
 		Files []string
 		Glob  string
+		Funcs template.FuncMap
 	}
 
 	HTML struct {
@@ -49,10 +50,10 @@ func (r HTMLDebug) Instance(name string, data interface{}) Render {
 }
 func (r HTMLDebug) loadTemplate() *template.Template {
 	if len(r.Files) > 0 {
-		return template.Must(template.ParseFiles(r.Files...))
+		return template.Must(template.New("gin-gonic-root-template").Funcs(r.Funcs).ParseFiles(r.Files...))
 	}
 	if len(r.Glob) > 0 {
-		return template.Must(template.ParseGlob(r.Glob))
+		return template.Must(template.New("gin-gonic-root-template").Funcs(r.Funcs).ParseGlob(r.Glob))
 	}
 	panic("the HTML debug render was created without files or glob pattern")
 }
